@@ -1,6 +1,9 @@
 from fastapi import APIRouter
 
-#enrutador
-api_router=APIRouter()
+from app.routers.business_profile_router import router as profile_router
 
-#Registrar Rutas
+# enrutador principal
+api_router = APIRouter()
+
+# Registrar Rutas
+api_router.include_router(profile_router)
