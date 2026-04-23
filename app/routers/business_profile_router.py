@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.application.factories.business_profile_factory import BusinessProfileFactory
 from app.infrastructure.database import get_db
 from app.infrastructure.models.business_profile_model import BusinessProfileModel
-from app.application.factories.business_profile_factory import BusinessProfileFactory
-from app.schemas.business_profile_schema import BusinessProfileCreate, BusinessProfileResponse
+from app.schemas.business_profile_schema import (
+    BusinessProfileCreate,
+    BusinessProfileResponse,
+)
 
-router = APIRouter(prefix="/api/v1/profiles", tags=["Business Profiles"])
+router = APIRouter(prefix="/profiles", tags=["Business Profiles"])
 
 
 @router.post("/", response_model=BusinessProfileResponse)

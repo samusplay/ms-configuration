@@ -1,8 +1,7 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
-from fastapi.middleware.cors import CORSMiddleware
-from app.infrastructure.models.business_profile_model import BusinessProfileModel
 from app.infrastructure.database import Base, check_db_connection, engine
 from app.routers.api import api_router
 
@@ -37,19 +36,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # luego lo restringimos
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 #eSto incluye el archivo del router para no estar escribiendo rutas
-app.include_router(api_router)
+app.include_router(api_router,prefix="/api/v1/configuration")
 
 
-@app.get("/health", tags=["Sistema"])
+@app.get("/api/v1/configuration/health", tags=["Sistema"])
 def health():
     return {"status": "ok", "service": "ms-CONFIGURATION"}
 
