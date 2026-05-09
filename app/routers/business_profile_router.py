@@ -66,3 +66,17 @@ def update_profile(profile_id: int, data: BusinessProfileCreate, db: Session = D
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.delete("/{profile_id}", status_code=200)
+def delete_profile(profile_id: int, db: Session = Depends(get_db)):
+    # Buscar perfil existente
+    db_profile = db.query(BusinessProfileModel).filter(BusinessProfileModel.id == profile_id).first()
+
+    if not db_profile:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+
+    # Eliminar perfil de la DB
+    db.delete(db_profile)
+    db.commit()
+
+    return {"message": "Perfil eliminado correctamente", "id": profile_id}
