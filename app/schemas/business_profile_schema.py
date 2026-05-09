@@ -13,3 +13,5 @@ class BusinessProfileResponse(BusinessProfileCreate):
 
     class Config:
         orm_mode = True
+        
+    
