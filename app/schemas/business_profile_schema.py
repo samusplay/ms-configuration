@@ -7,9 +7,8 @@ class BusinessProfileCreate(BaseModel):
     peso_competencia: float
     is_active: bool = True
 
-
 class BusinessProfileResponse(BusinessProfileCreate):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

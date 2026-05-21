@@ -9,16 +9,25 @@ from app.schemas.business_profile_schema import (
     BusinessProfileResponse,
 )
 
-router = APIRouter(prefix="/profiles", tags=["Business Profiles"])
+router = APIRouter(
+    prefix="/profiles",
+    tags=["Business Profiles"]
+)
 
 
+# =========================================================
+# CREAR PERFIL
+# =========================================================
 @router.post("/", response_model=BusinessProfileResponse)
-def create_profile(data: BusinessProfileCreate, db: Session = Depends(get_db)):
+def create_profile(
+    data: BusinessProfileCreate,
+    db: Session = Depends(get_db)
+):
     try:
-        # 🔥 Validación con Factory
+        # Validación con Factory
         profile = BusinessProfileFactory.create_profile(data.dict())
 
-        # Guardar en DB
+        # Crear modelo DB
         db_profile = BusinessProfileModel(
             nombre_perfil=profile.nombre_perfil,
             peso_poblacion=profile.peso_poblacion,
@@ -27,6 +36,7 @@ def create_profile(data: BusinessProfileCreate, db: Session = Depends(get_db)):
             is_active=profile.is_active
         )
 
+        # Guardar en base de datos
         db.add(db_profile)
         db.commit()
         db.refresh(db_profile)
@@ -34,49 +44,118 @@ def create_profile(data: BusinessProfileCreate, db: Session = Depends(get_db)):
         return db_profile
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
 
 
+# =========================================================
+# LISTAR TODOS LOS PERFILES
+# =========================================================
 @router.get("/", response_model=list[BusinessProfileResponse])
 def get_profiles(db: Session = Depends(get_db)):
-    return db.query(BusinessProfileModel).all()
+
+    profiles = db.query(BusinessProfileModel).all()
+
+    return profiles
+
+
+# =========================================================
+# OBTENER PERFIL ACTIVO
+# =========================================================
+@router.get("/active", response_model=BusinessProfileResponse)
+def get_active_profile(db: Session = Depends(get_db)):
+
+    active_profile = (
+        db.query(BusinessProfileModel)
+        .filter(BusinessProfileModel.is_active == True)
+        .first()
+    )
+
+    if not active_profile:
+        raise HTTPException(
+            status_code=404,
+            detail="No hay perfil activo"
+        )
+
+    return active_profile
+
+
+# =========================================================
+# ACTUALIZAR PERFIL
+# =========================================================
 @router.put("/{profile_id}", response_model=BusinessProfileResponse)
-def update_profile(profile_id: int, data: BusinessProfileCreate, db: Session = Depends(get_db)):
-    # Buscar perfil existente
-    db_profile = db.query(BusinessProfileModel).filter(BusinessProfileModel.id == profile_id).first()
+def update_profile(
+    profile_id: int,
+    data: BusinessProfileCreate,
+    db: Session = Depends(get_db)
+):
+
+    # Buscar perfil
+    db_profile = (
+        db.query(BusinessProfileModel)
+        .filter(BusinessProfileModel.id == profile_id)
+        .first()
+    )
 
     if not db_profile:
-        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+        raise HTTPException(
+            status_code=404,
+            detail="Perfil no encontrado"
+        )
 
     try:
         # Validar con Factory
         profile = BusinessProfileFactory.create_profile(data.dict())
 
-        # Actualizar campos
+        # Actualizar datos
         db_profile.nombre_perfil = profile.nombre_perfil
         db_profile.peso_poblacion = profile.peso_poblacion
         db_profile.peso_ingresos = profile.peso_ingresos
         db_profile.peso_competencia = profile.peso_competencia
         db_profile.is_active = profile.is_active
 
+        # Guardar cambios
         db.commit()
         db.refresh(db_profile)
 
         return db_profile
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
 
+
+# =========================================================
+# ELIMINAR PERFIL
+# =========================================================
 @router.delete("/{profile_id}", status_code=200)
-def delete_profile(profile_id: int, db: Session = Depends(get_db)):
-    # Buscar perfil existente
-    db_profile = db.query(BusinessProfileModel).filter(BusinessProfileModel.id == profile_id).first()
+def delete_profile(
+    profile_id: int,
+    db: Session = Depends(get_db)
+):
+
+    # Buscar perfil
+    db_profile = (
+        db.query(BusinessProfileModel)
+        .filter(BusinessProfileModel.id == profile_id)
+        .first()
+    )
 
     if not db_profile:
-        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+        raise HTTPException(
+            status_code=404,
+            detail="Perfil no encontrado"
+        )
 
-    # Eliminar perfil de la DB
+    # Eliminar
     db.delete(db_profile)
     db.commit()
 
-    return {"message": "Perfil eliminado correctamente", "id": profile_id}
+    return {
+        "message": "Perfil eliminado correctamente",
+        "id": profile_id
+    }
