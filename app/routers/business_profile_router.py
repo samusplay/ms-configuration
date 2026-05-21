@@ -12,7 +12,8 @@ from app.schemas.business_profile_schema import (
 router = APIRouter(prefix="/profiles", tags=["Business Profiles"])
 
 
-@router.post("/", response_model=BusinessProfileResponse)
+@router.post("", response_model=BusinessProfileResponse)
+@router.post("/", include_in_schema=False)
 def create_profile(data: BusinessProfileCreate, db: Session = Depends(get_db)):
     try:
         # 🔥 Validación con Factory
@@ -37,7 +38,8 @@ def create_profile(data: BusinessProfileCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/", response_model=list[BusinessProfileResponse])
+@router.get("", response_model=list[BusinessProfileResponse])
+@router.get("/", include_in_schema=False)
 def get_profiles(db: Session = Depends(get_db)):
     return db.query(BusinessProfileModel).all()
 @router.put("/{profile_id}", response_model=BusinessProfileResponse)
