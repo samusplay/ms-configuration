@@ -7,7 +7,6 @@ class BusinessProfileCreate(BaseModel):
     peso_competencia: float
     is_active: bool = True
 
-
 class BusinessProfileResponse(BusinessProfileCreate):
     id: int
 
